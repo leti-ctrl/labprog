@@ -1,18 +1,19 @@
-#ifndef LABPROG_BANKACCOUNT_H
-#define LABPROG_BANKACCOUNT_H
-
-#include <fstream>
+#include <string>
 using namespace std;
+
+static const int MAX_NUM_TRANSACTION = 50;
+
+
+#include "Transaction.h"
 
 class BankAccount {
 
 public:
-    BankAccount(const char* n, const char* s, float a = 0, float b = 1000);
+    explicit BankAccount(string s, string t, float a = 0, float b = 1000);
+    ~BankAccount();
 
-    const char *getName() const;
-    const char *getSurname() const;
-    const char *getOwner() const;
-
+    const string &getOwner() const;
+    char *getHistorical() const;
     int getNumberAccount() const;
 
     float getAvailableBalance() const;
@@ -21,26 +22,27 @@ public:
 
     float getBankCredit() const;
     float getRealBankCredit() const;
-    void setRealBankCredit(float r);
     void printRealBankCredit ();
 
     int isLegalTransaction (float money);
     int checkBankCredit ();
     void fillBankCredit (float money);
-    
-    void readHistory ();
+
+    void checkNumberTransaction ();
+    void doBankTransfer (string causal, float amount, BankAccount* recipient);
+    void doCredit (string causal, float amount);
+    void doDebit (string causal, float amount);
 
 private:
-    const char* name;
-    const char* surname;
-    char owner [50];
+    string owner;
+    string type;
     int numberAccount;
+    char* historical;
+
     float availableBalance;
     const float bankCredit;
     float realBankCredit;
 
-    fstream historical;
+    Transaction* listTransaction [MAX_NUM_TRANSACTION] {};
+    int numberTransaction;
 };
-
-
-#endif //LABPROG_BANKACCOUNT_H

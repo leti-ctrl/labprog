@@ -1,16 +1,32 @@
 #include "Credit.h"
+#include "Date.h"
 
-Credit::Credit(BankAccount *b, float m) : account (b), money(m){
+#include <fstream>
+#include <string>
+#include <utility>
+using namespace std;
 
+Credit::Credit(string c, BankAccount *b, float m) : Transaction(move(c),m), account (b) { }
+
+void Credit::doTransaction() {
     if (account->checkBankCredit() == 0)
-        account->setAvailableBalance(account->getAvailableBalance() + money);
+        account->setAvailableBalance(account->getAvailableBalance() + amount);
     else {
-        account->fillBankCredit(money);
+        account->fillBankCredit(amount);
     }
 
-    fstream a (account->getOwner(), ios::app);
-    a<<"++++ Accredito: +"<<money<<" $"<<endl;
-    a.close();
+    auto file = new fstream (account->getHistorical(), ios::app);
+    auto date = new Date;
+
+    *file<<"++++ ACCREDITO - Operazione n: "<<numberTransaction<<endl;
+    *file<<"     Importo: "<<amount<<" $"<<endl;
+    *file<<"     Causale: "<<causal<<endl;
+    *file<<"     Data contabile: "<<date->getCurrentDate()<<endl;
+    *file<<endl;
+    file->close();
+
+    delete date;
+    delete file;
 
     account->printAvailableBalance();
     account->printRealBankCredit();

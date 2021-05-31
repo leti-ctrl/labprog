@@ -1,41 +1,51 @@
 #include "BankAccount.h"
 
+#include "Date.h"
+#include "BankTransfer.h"
+#include "Credit.h"
+#include "Debit.h"
+
 #include<iostream>
 #include<cstdlib>
-#include <cstring>
+#include <fstream>
+#include <utility>
 using namespace std;
 
-BankAccount::BankAccount(const char *n, const char *s, float a, float b) :
-                        name(n) , surname (s), availableBalance(a), bankCredit(b) , realBankCredit(b){
+BankAccount::BankAccount(string s, string t, float a, float b):
+        owner(move(s)), type(move(t)), availableBalance(a), bankCredit(b), realBankCredit (b) {
 
     //crea in modo random il numero del cc
-    numberAccount = rand()%1000000000000+100000000000;
+    numberAccount = rand()%100000000+10000000;
 
-    //crea la stringa per dare il nome al cc
-    strcpy(owner,surname);
-    strcat(owner,name);
+    numberTransaction = 0;
+
+    historical = new char [10];
+    sprintf(historical, "%d" , numberAccount);
 
     //inizializza lo storico
-    historical.open(owner, ios::out);
-    historical << "### Conto corrente di: " << getName() << " " << getSurname() << endl;
-    historical << "    Numero: " << getNumberAccount() << endl;
-    historical << "    Fido massimo: " << getBankCredit() << endl;
-    historical << endl;
-    historical.close();
+    auto file = new fstream (historical, ios::out);
+    auto date = new Date;
+    *file << "########## Conto corrente numero: " << getNumberAccount() <<" ##########"<< endl;
+    *file << "Proprietario: " << owner << endl;
+    *file << "Scopo di utilizzo del C/C: "<< type << endl;
+    *file << "Data di apertura: " << date->getCurrentDate() << endl;
+    *file << "Fido massimo: " << getBankCredit() << endl;
+    *file << endl;
+    file->close();
+    delete date;
+    delete file;
 }
 
-const char *BankAccount::getName() const {
-    return name;
+BankAccount::~BankAccount() {
+    delete historical;
+
+    for (int i = 0; i<numberTransaction; i++)
+        delete listTransaction [i];
 }
 
-const char *BankAccount::getSurname() const {
-    return surname;
-}
-
-const char *BankAccount::getOwner() const {
+const string &BankAccount::getOwner() const {
     return owner;
 }
-
 
 int BankAccount::getNumberAccount() const {
     return numberAccount;
@@ -59,20 +69,6 @@ float BankAccount::getRealBankCredit() const {
 }
 
 
-void BankAccount::readHistory() {
-    //legge lo storico riga per riga
-
-    historical.open(owner, ios::in);
-    char ch;
-    while(!historical.eof())
-    {
-        historical.get(ch);
-        cout << ch;
-    }
-
-    historical.close();
-}
-
 int BankAccount::isLegalTransaction(float money) {
     //controlla se è possibile effettuare una transazione qualsiasi, cioè se c'è abbastanza denaro
     //ritorna 0 se è possibile prelevare i soldi dal saldo oppure se è possibile prelevare i soldi dal fido;
@@ -82,7 +78,7 @@ int BankAccount::isLegalTransaction(float money) {
         availableBalance -= money;
         return 0;
     }
-    else if (realBankCredit >= money) {
+    else if (realBankCredit + availableBalance >= money) {
         float dif = money - availableBalance;
         availableBalance = 0;
         realBankCredit -= dif;
@@ -119,18 +115,58 @@ void BankAccount::fillBankCredit(float money) {
         realBankCredit += money;
 }
 
-void BankAccount::setRealBankCredit(float r) {
-    BankAccount::realBankCredit = realBankCredit;
-}
-
 void BankAccount::printAvailableBalance() {
-    historical.open(owner, ios::app);
-    historical<< "     Saldo: "<<getAvailableBalance()<<" $"<<endl;
-    historical.close();
+    auto file = new fstream (historical, ios::app);
+    *file<< "     Saldo: "<<getAvailableBalance()<<" $"<<endl;
+    file->close();
+    delete file;
 }
 
 void BankAccount::printRealBankCredit() {
-    historical.open(owner, ios::app);
-    historical<< "     Fido: "<<getRealBankCredit()<<" $"<<endl;
-    historical.close();
+    auto file = new fstream (historical, ios::app);
+    *file<< "     Fido: "<<getRealBankCredit()<<" $"<<endl;
+    *file<<endl;
+    file->close();
+    delete file;
 }
+
+char *BankAccount::getHistorical() const {
+    return historical;
+}
+
+void BankAccount::checkNumberTransaction() {
+    if (numberTransaction == MAX_NUM_TRANSACTION){
+        delete listTransaction[0];
+        for (int i = 0; i < MAX_NUM_TRANSACTION ; i++)
+            listTransaction [i] = listTransaction [i+1];
+        numberTransaction -= 1;
+    }
+}
+
+void BankAccount::doBankTransfer(string causal, float amount, BankAccount *recipient) {
+    checkNumberTransaction();
+
+    listTransaction[numberTransaction] = new BankTransfer (move(causal), this, recipient, amount);
+    listTransaction[numberTransaction]->doTransaction();
+
+    numberTransaction += 1;
+}
+
+void BankAccount::doCredit(string causal, float amount) {
+    checkNumberTransaction();
+
+    listTransaction[numberTransaction] = new Credit (move(causal), this, amount);
+    listTransaction[numberTransaction]->doTransaction();
+
+    numberTransaction += 1;
+}
+
+void BankAccount::doDebit(string causal, float amount) {
+    checkNumberTransaction();
+
+    listTransaction[numberTransaction] = new Debit (move(causal) , this, amount);
+    listTransaction[numberTransaction]->doTransaction();
+
+    numberTransaction += 1;
+}
+

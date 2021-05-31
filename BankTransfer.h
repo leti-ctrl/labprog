@@ -1,16 +1,18 @@
-#ifndef LABPROG_BANKTRANSFER_H
-#define LABPROG_BANKTRANSFER_H
-
 #include "BankAccount.h"
+#include "Transaction.h"
 
-class BankTransfer {
+#include <string>
+using namespace std;
+
+class BankTransfer : public Transaction {
 public:
 
-    BankTransfer (BankAccount* s, BankAccount* r, float m);
+    BankTransfer (string c, BankAccount* s, BankAccount* r, float m);
+    ~BankTransfer() override = default;
+
+    void doTransaction () override;
 
 private:
-    int number;
     BankAccount* sender;
     BankAccount* recipient;
-    float money;
 };

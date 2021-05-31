@@ -1,14 +1,17 @@
-#ifndef LABPROG_CREDIT_H
-#define LABPROG_CREDIT_H
-
 #include "BankAccount.h"
+#include "Transaction.h"
 
-class Credit {
+#include <string>
+using namespace std;
+
+class Credit : public Transaction {
 public:
 
-    Credit (BankAccount* b, float m);
+    Credit (string c, BankAccount* b, float m);
+    ~Credit() override = default;
+
+    void doTransaction () override;
 
 private:
     BankAccount* account;
-    float money;
 };

@@ -7,7 +7,7 @@ using namespace std;
 class Credit : public Transaction {
 public:
 
-    Credit (string c, BankAccount* b, float m);
+    Credit (string c, float m, BankAccount* a);
     ~Credit() override = default;
 
     void doTransaction () override;

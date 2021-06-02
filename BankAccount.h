@@ -32,6 +32,8 @@ public:
     void doBankTransfer (string causal, float amount, BankAccount* recipient);
     void doCredit (string causal, float amount);
     void doDebit (string causal, float amount);
+    
+    void setListTransaction(Transaction* transaction);
 
 private:
     string owner;

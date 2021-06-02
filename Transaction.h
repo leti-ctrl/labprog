@@ -10,6 +10,11 @@ public:
     Transaction (const Transaction& copy);
     virtual ~Transaction();
 
+    long getNumberTransaction() const;
+    const string &getCausal() const;
+    float getAmount() const;
+    Date *getDateTransaction() const;
+
     virtual void doTransaction () = 0;
 
 protected:

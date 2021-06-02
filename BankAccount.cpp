@@ -146,7 +146,8 @@ void BankAccount::checkNumberTransaction() {
 void BankAccount::doBankTransfer(string causal, float amount, BankAccount *recipient) {
     checkNumberTransaction();
 
-    listTransaction[numberTransaction] = new BankTransfer (move(causal), this, recipient, amount);
+    listTransaction[numberTransaction] = new BankTransfer (move(causal), amount, this, recipient);
+    recipient->setListTransaction(listTransaction[numberTransaction]);
     listTransaction[numberTransaction]->doTransaction();
 
     numberTransaction += 1;
@@ -155,7 +156,7 @@ void BankAccount::doBankTransfer(string causal, float amount, BankAccount *recip
 void BankAccount::doCredit(string causal, float amount) {
     checkNumberTransaction();
 
-    listTransaction[numberTransaction] = new Credit (move(causal), this, amount);
+    listTransaction[numberTransaction] = new Credit (move(causal), amount, this);
     listTransaction[numberTransaction]->doTransaction();
 
     numberTransaction += 1;
@@ -164,9 +165,15 @@ void BankAccount::doCredit(string causal, float amount) {
 void BankAccount::doDebit(string causal, float amount) {
     checkNumberTransaction();
 
-    listTransaction[numberTransaction] = new Debit (move(causal) , this, amount);
+    listTransaction[numberTransaction] = new Debit (move(causal) , amount , this);
     listTransaction[numberTransaction]->doTransaction();
 
     numberTransaction += 1;
 }
 
+void BankAccount::setListTransaction(Transaction *transaction) {
+    checkNumberTransaction();
+
+    listTransaction[numberTransaction] = transaction;
+    numberTransaction++;
+}

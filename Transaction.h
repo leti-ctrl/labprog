@@ -7,6 +7,7 @@ class Transaction {
 public:
 
     explicit Transaction (string c, float a);
+    Transaction (const Transaction& copy);
     virtual ~Transaction();
 
     virtual void doTransaction () = 0;

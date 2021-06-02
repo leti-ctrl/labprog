@@ -6,7 +6,7 @@
 #include <utility>
 using namespace std;
 
-Credit::Credit(string c, BankAccount* a, float m) : Transaction(move(c),m) , account(a) { }
+Credit::Credit(string c, float m, BankAccount* a) : Transaction(move(c),m) , account(a) { }
 
 void Credit::doTransaction() {
 

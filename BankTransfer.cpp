@@ -1,13 +1,12 @@
 #include "BankTransfer.h"
-#include "Date.h"
 
 #include <fstream>
 #include <string>
 #include <utility>
 using namespace std;
 
-BankTransfer::BankTransfer(string c, BankAccount *s, BankAccount *r, float m):
-        Transaction(move(c), m), sender(s), recipient(r) {}
+BankTransfer::BankTransfer(string c,  float m, BankAccount* s, BankAccount* r):
+Transaction(move(c), m), sender(s), recipient(r) {}
 
 void BankTransfer::doTransaction() {
     //apre lo storico dei cc
@@ -41,25 +40,21 @@ void BankTransfer::doTransaction() {
 
     }
 
-    auto date = new Date;
-
-    *fileSender << "     Intestato a " << recipient->getOwner() <<
-                " sul conto " << recipient->getNumberAccount() << endl;
+    *fileSender << "     Intestato a " << recipient->getOwner()<<" sul conto " << recipient->getNumberAccount()<<endl;
     *fileSender << "     Causale: " << causal << endl;
     *fileSender << "     Importo: " << amount << " $" << endl;
-    *fileSender << "     Data contabile: " << date->getCurrentDate() << endl;
+    *fileSender << "     Data contabile: " << dateTransaction->getCurrentDate() << endl;
     *fileSender << endl;
     fileSender->close();
     delete fileSender;
 
     *fileRecipient << "     Causale: " << causal << endl;
     *fileRecipient << "     Importo: " << amount << " $" << endl;
-    *fileRecipient << "     Data contabile: " << date->getCurrentDate() << endl;
+    *fileRecipient << "     Data contabile: " << dateTransaction->getCurrentDate() << endl;
     *fileRecipient << endl;
     fileRecipient->close();
     delete fileRecipient;
 
-    delete date;
 
     sender->printAvailableBalance();
     sender->printRealBankCredit();

@@ -146,8 +146,11 @@ void BankAccount::checkNumberTransaction() {
 void BankAccount::doBankTransfer(string causal, float amount, BankAccount *recipient) {
     checkNumberTransaction();
 
+    string c;
+    c.assign(causal);
+
     listTransaction[numberTransaction] = new BankTransfer (move(causal), amount, this, recipient);
-    recipient->setListTransaction(listTransaction[numberTransaction]);
+    recipient->setListTransaction(new BankTransfer (move(c), amount, this, recipient));
     listTransaction[numberTransaction]->doTransaction();
 
     numberTransaction += 1;
